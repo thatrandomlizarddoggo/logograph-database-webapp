@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Logograph Database</title>
+    <style>
+        .Logograph-Table {  /* Changed from .elements-table */
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .table-header {
+            display: grid;
+            grid-template-columns: 2fr 2fr 2fr 1fr;
+            gap: 1rem;
+            padding: 1rem;
+            font-weight: bold;
+            border-bottom: 2px solid #333;
+            margin-bottom: 0.5rem;
+        }
+        .element-row {
+            display: grid;
+            grid-template-columns: 2fr 2fr 2fr 1fr;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+        }
+        .svg-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .Word-symbol {  /* Changed from .element-symbol */
+            height: 1.5rem; /* 1.5x text height */
+            width: auto;
+            max-width: 3rem; /* Added to prevent ultra-wide icons */
+        }
+        .element-row:hover {
+            background-color: #f8f9fa;
+        }
+        h1 {
+            text-align: center;
+            padding: 2rem 0;
+            color: #333;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 1rem;
+        }
+        .new-entry-button {
+            background-color: #007bff;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .new-entry-button:hover {
+            background-color: #0056b3;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Logograph Database</h1>
+
+    <div style="text-align: center; margin-bottom: 2rem;">
+         <a href="/new" class="new-entry-button">+ New Entry</a>
+    </div>
+
+    <div class="Logograph-Table">
+        <!-- Table Header -->
+        <div class="table-header">
+            <div>English</div>
+            <div>Language</div>
+            <div>Type</div>
+            <div>Symbol</div>
+        </div>
+
+        <!-- Table Rows -->
+        {% for Word in Words %}
+        <div class="element-row">
+            <div><a href="/edit/{{ Word.id }}">{{ Word.word_en }}</a></div>
+            <div>{{ Word.word_translated }}</div>
+            <div>{{ Word.type }}</div>
+            <div class="svg-container">
+                <img class="Word-symbol"
+                     src="{{ url_for('static', filename=Word.svg_path) }}"
+                     alt="{{ Word.word_en }} symbol">
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

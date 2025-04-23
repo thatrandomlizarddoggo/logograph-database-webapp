@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>New Entry - Logograph Database</title>
+    <style>
+        .edit-form {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 2rem;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            background-color: #fff;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        input[type="file"] {
+            width: 100%;
+            padding: 0.5rem 0;
+        }
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        .svg-container {
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .svg-preview {
+            max-width: 150px;
+            max-height: 150px;
+            margin: 0.5rem auto;
+            border: 1px solid #eee;
+            padding: 10px;
+            background-color: #f9f9f9;
+            display: block;
+        }
+        .upload-hint {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+        .flash-message {
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            background-color: #ffdddd;
+            color: #d8000c;
+            border: 1px solid #d8000c;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            margin-left: 1rem;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .required-field::after {
+            content: " *";
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="edit-form">
+        <h2>Create New Entry</h2>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-message">
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="word_en" class="required-field">English Word:</label>
+                <input type="text" id="word_en" name="word_en" required>
+            </div>
+
+            <div class="form-group">
+                <label for="word_translated">Translated Word:</label>
+                <input type="text" id="word_translated" name="word_translated">
+            </div>
+
+            <div class="form-group">
+                <label for="type">Word Type:</label>
+                <select id="type" name="type">
+                    <option value="noun">Noun</option>
+                    <option value="verb">Verb</option>
+                    <option value="adjective">Adjective</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="svg_file" class="required-field">Symbol:</label>
+                <div class="svg-container">
+                    <div id="svg-preview-placeholder" class="svg-preview" style="color: #999; padding: 2rem;">
+                        SVG preview will appear here
+                    </div>
+                </div>
+                <input type="file" id="svg_file" name="svg_file" accept=".svg" required>
+                <p class="upload-hint">Upload an SVG file (required)</p>
+            </div>
+
+            <div>
+                <button type="submit" class="btn">Create Entry</button>
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('svg_file');
+            const previewPlaceholder = document.getElementById('svg-preview-placeholder');
+
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file && file.type === 'image/svg+xml') {
+                    const reader = new FileReader();
+
+                    reader.onload = function(event) {
+                        // Create new image element if it doesn't exist
+                        let previewImg = document.querySelector('#svg-preview');
+                        if (!previewImg) {
+                            previewImg = document.createElement('img');
+                            previewImg.id = 'svg-preview';
+                            previewImg.className = 'svg-preview';
+                            previewPlaceholder.replaceWith(previewImg);
+                        }
+
+                        previewImg.src = event.target.result;
+                        previewImg.alt = "Uploaded symbol preview";
+                    };
+
+                    reader.readAsDataURL(file);
+                } else if (file) {
+                    // Reset if invalid file type
+                    fileInput.value = '';
+                    alert('Please select an SVG file');
+                }
+            });
+
+            // Validate form before submission
+            document.querySelector('form').addEventListener('submit', function(e) {
+                const wordEn = document.getElementById('word_en').value.trim();
+                const svgFile = document.getElementById('svg_file').files[0];
+
+                if (!wordEn) {
+                    e.preventDefault();
+                    alert('Please enter an English word');
+                    return;
+                }
+
+                if (!svgFile) {
+                    e.preventDefault();
+                    alert('Please upload an SVG file');
+                    return;
+                }
+
+                // Validate filename
+                if (/[^a-zA-Z0-9\-_]/.test(wordEn)) {
+                    e.preventDefault();
+                    alert('English word can only contain letters, numbers, hyphens, and underscores');
+                    return;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

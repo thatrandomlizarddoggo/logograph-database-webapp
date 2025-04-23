@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Word</title>
+    <style>
+        .edit-form {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 2rem;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            background-color: #fff;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        input[type="file"] {
+            width: 100%;
+            padding: 0.5rem 0;
+        }
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        .svg-container {
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .svg-preview {
+            max-width: 150px;
+            max-height: 150px;
+            margin: 0.5rem auto;
+            border: 1px solid #eee;
+            padding: 10px;
+            background-color: #f9f9f9;
+            display: block;
+        }
+        .upload-hint {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+        .flash-message {
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            background-color: #ffdddd;
+            color: #d8000c;
+            border: 1px solid #d8000c;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            margin-left: 1rem;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="edit-form">
+        <h2>Edit Word: {{ word.word_en }}</h2>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-message">
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="original_word_en" value="{{ original_word_en }}">
+
+            <div class="form-group">
+                <label for="word_en">English Word:</label>
+                <input type="text" id="word_en" name="word_en" value="{{ word.word_en }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="word_translated">Translated Word:</label>
+                <input type="text" id="word_translated" name="word_translated" value="{{ word.word_translated }}">
+            </div>
+
+            <div class="form-group">
+                <label for="type">Word Type:</label>
+                <select id="type" name="type">
+                    <option value="noun" {% if word.type == 'noun' %}selected{% endif %}>Noun</option>
+                    <option value="verb" {% if word.type == 'verb' %}selected{% endif %}>Verb</option>
+                    <option value="adjective" {% if word.type == 'adjective' %}selected{% endif %}>Adjective</option>
+                    <option value="other" {% if word.type == 'other' %}selected{% endif %}>Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Symbol:</label>
+                <div class="svg-container">
+                    {% if word.svg_path %}
+                        <img class="svg-preview"
+                             src="{{ url_for('static', filename=word.svg_path) }}"
+                             alt="{{ word.word_en }} symbol">
+                    {% else %}
+                        <div class="svg-preview" style="color: #999; padding: 2rem;">
+                            No symbol uploaded
+                        </div>
+                    {% endif %}
+                </div>
+                <input type="file" id="svg_file" name="svg_file" accept=".svg">
+                <p class="upload-hint">Upload a new SVG file to replace the current symbol</p>
+            </div>
+
+            <div>
+                <button type="submit" class="btn">Save Changes</button>
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Live preview of uploaded SVG
+        document.getElementById('svg_file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type === 'image/svg+xml') {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    let preview = document.querySelector('.svg-preview');
+                    if (!preview) {
+                        preview = document.createElement('img');
+                        preview.className = 'svg-preview';
+                        document.querySelector('.svg-container').appendChild(preview);
+                    }
+                    preview.src = event.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html>
